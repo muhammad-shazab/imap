@@ -1,15 +1,17 @@
 require "./imap/*"
 require "openssl"
-require "logger"
+
+# require "logger"
 
 module Imap
   class Client
     @socket : TCPSocket | OpenSSL::SSL::Socket::Client | Nil = nil
-    @logger : Logger
 
-    def initialize(host = "imap.gmail.com", port = 993, username = "", password = "", loglevel = Logger::ERROR)
-      @logger = Logger.new(STDOUT)
-      @logger.level = loglevel
+    # @logger : Logger
+
+    def initialize(host = "imap.gmail.com", port = 993, username = "", password = "")
+      # @logger = Logger.new(STDOUT)
+      # @logger.level = loglevel
       @mailboxes = [] of String
 
       @command_history = [] of String
@@ -35,7 +37,7 @@ module Imap
       params = parameters.join(" ")
       command_and_parameter += " #{params}" if params && params.size > 0
       @command_history << command_and_parameter
-      @logger.info "=====> #{command_and_parameter}"
+      # @logger.info "=====> #{command_and_parameter}"
       socket << command_and_parameter << "\r\n"
       socket.flush
       response
@@ -69,7 +71,6 @@ module Imap
       command("RENAME", mailbox, newname)
     end
 
-
     # Returns an array of mailbox names
     def list : Array(String)
       mailboxes = [] of String
@@ -93,9 +94,9 @@ module Imap
     #
     # The return value is a hash of attributes. For example:
     # ```
-    #   p imap.status("inbox", ["MESSAGES", "RECENT"])
-    #   #=> {"RECENT"=>0, "MESSAGES"=>44}
-    #```
+    # p imap.status("inbox", ["MESSAGES", "RECENT"])
+    # # => {"RECENT"=>0, "MESSAGES"=>44}
+    # ```
     def status(mailbox, attr : Array(String))
       param = "(#{attr.join(" ")})"
       res = command("STATUS", mailbox, param)
@@ -109,7 +110,7 @@ module Imap
       end
       return vals
     end
-    
+
     private def process_mail_headers(res)
       ip = nil
       from = nil
@@ -124,7 +125,7 @@ module Imap
           end
         end
         if ip && from
-          @logger.info "from: #{from} ip: #{ip}"
+          # @logger.info "from: #{from} ip: #{ip}"
           from = nil
           ip = nil
         end
